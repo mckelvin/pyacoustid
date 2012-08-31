@@ -3,7 +3,7 @@
 # Distributed under the MIT license, see the LICENSE file for details. 
 
 """Low-level ctypes wrapper from the chromaprint library."""
-
+import os
 import sys
 import ctypes
 
@@ -17,7 +17,12 @@ def _guess_lib_name():
         return ('chromaprint.dll', 'libchromaprint.dll')
     elif sys.platform == 'cygwin':
         return ('libchromaprint.dll.a', 'cygchromaprint-0.dll')
-    return ('libchromaprint.so.0',)
+    VIRTUAL_ENV = os.environ.get('VIRTUAL_ENV')
+    if VIRTUAL_ENV:
+        VIRTUAL_ENV_CP_LIB = os.path.join(VIRTUAL_ENV,'lib/libchromaprint.so')
+        return ('libchromaprint.so.0',VIRTUAL_ENV_CP_LIB,)
+    else:
+        return ('libchromaprint.so.0',)
 
 for name in _guess_lib_name():
     try:
@@ -113,17 +118,27 @@ class Fingerprinter(object):
             self._ctx, data, len(data) // 2
         ))
 
-    def finish(self):
+    def finish(self,return_raw= False):
         """Finish the fingerprint generation process and retrieve the
         resulting fignerprint as a bytestring.
         """
         _check(_libchromaprint.chromaprint_finish(self._ctx))
-        fingerprint_ptr = ctypes.c_char_p()
-        _check(_libchromaprint.chromaprint_get_fingerprint(
-            self._ctx, ctypes.byref(fingerprint_ptr)
-        ))
-        fingerprint = fingerprint_ptr.value
-        _libchromaprint.chromaprint_dealloc(fingerprint_ptr)
+        if not return_raw:
+            fingerprint_ptr = ctypes.c_char_p()
+            _check(_libchromaprint.chromaprint_get_fingerprint(
+                self._ctx, ctypes.byref(fingerprint_ptr)
+            ))
+            fingerprint = fingerprint_ptr.value
+            _libchromaprint.chromaprint_dealloc(fingerprint_ptr)
+        else:
+            result_ptr = ctypes.POINTER(ctypes.c_int32)()
+            result_size = ctypes.c_int()
+            _check(_libchromaprint.chromaprint_get_raw_fingerprint(
+                self._ctx, ctypes.byref(result_ptr),ctypes.byref(result_size)
+            ))
+            fingerprint = result_ptr[:result_size.value]
+            _libchromaprint.chromaprint_dealloc(result_ptr)
+
         return fingerprint
 
 def decode_fingerprint(data, base64=True):

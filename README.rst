@@ -100,6 +100,13 @@ used when the Chromaprint library or fpcalc command-line tool cannot be found.
 Version History
 ---------------
 
+0.7.1
+  Forked from original repo, modify the `finish()`,if `finish(return_raw=True)`
+  is called, return raw chromaprint instead of base64ed encode chromaprint.Add
+  virtual env capability.via:`cmake -DCMAKE_INSTALL_PREFIX:PATH=$VIRTUAL_ENV .`.
+  add some examples
+
+
 0.7
   Properly encode Unicode parameters (resolves a ``UnicodeEncodeError``
   in fingerprint submission).

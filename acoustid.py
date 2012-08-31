@@ -181,7 +181,7 @@ def _api_request(url, params):
     except ValueError:
         raise WebServiceError('response is not valid JSON')
 
-def fingerprint(samplerate, channels, pcmiter):
+def fingerprint(samplerate, channels, pcmiter,return_raw=False):
     """Fingerprint audio data given its sample rate and number of
     channels.  pcmiter should be an iterable containing blocks of PCM
     data as byte strings. Raises a FingerprintGenerationError if
@@ -201,7 +201,7 @@ def fingerprint(samplerate, channels, pcmiter):
             if position >= endposition:
                 break
 
-        return fper.finish()
+        return fper.finish(return_raw)
     except chromaprint.FingerprintError:
         raise FingerprintGenerationError("fingerprint calculation failed")
 
@@ -246,12 +246,12 @@ def parse_lookup_result(data):
 
             yield score, recording['id'], recording.get('title'), artist_name
 
-def _fingerprint_file_audioread(path):
+def _fingerprint_file_audioread(path,return_raw=False):
     """Fingerprint a file by using audioread and chromaprint."""
     try:
         with audioread.audio_open(path) as f:
             duration = f.duration
-            fp = fingerprint(f.samplerate, f.channels, iter(f))
+            fp = fingerprint(f.samplerate, f.channels, iter(f),return_raw)
     except audioread.DecodeError:
         raise FingerprintGenerationError("audio could not be decoded")
     return duration, fp
@@ -292,14 +292,14 @@ def _fingerprint_file_fpcalc(path):
         raise FingerprintGenerationError("missing fpcalc output")
     return duration, fp
 
-def fingerprint_file(path):
+def fingerprint_file(path,return_raw=False):
     """Fingerprint a file either using the Chromaprint dynamic library
     or the fpcalc command-line tool, whichever is available. Returns the
     duration and the fingerprint.
     """
     path = os.path.abspath(os.path.expanduser(path))
     if have_audioread and have_chromaprint:
-        return _fingerprint_file_audioread(path)
+        return _fingerprint_file_audioread(path,return_raw)
     else:
         return _fingerprint_file_fpcalc(path)
 

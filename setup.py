@@ -25,13 +25,13 @@ def _read(fn):
     return data
 
 setup(name='pyacoustid',
-      version='0.7',
+      version='0.7.1',
       description=
         'bindings for Chromaprint acoustic fingerprinting and the '
         'Acoustid API',
-      author='Adrian Sampson',
-      author_email='adrian@radbox.org',
-      url='https://github.com/sampsyo/pyacoustid',
+      author='Adrian Sampson, Myautsai Pan',
+      author_email='adrian@radbox.org, ibmmc@live.com',
+      url='https://github.com/mckelvin/pyacoustid',
       license='MIT',
       platforms='ALL',
       long_description=_read('README.rst'),
