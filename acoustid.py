@@ -201,7 +201,7 @@ def fingerprint(samplerate, channels, pcmiter,return_raw=False):
             if position >= endposition:
                 break
 
-        return fper.finish(return_raw)
+        return fper.finish(return_raw=return_raw)
     except chromaprint.FingerprintError:
         raise FingerprintGenerationError("fingerprint calculation failed")
 
@@ -251,7 +251,7 @@ def _fingerprint_file_audioread(path,return_raw=False):
     try:
         with audioread.audio_open(path) as f:
             duration = f.duration
-            fp = fingerprint(f.samplerate, f.channels, iter(f),return_raw)
+            fp = fingerprint(f.samplerate, f.channels, iter(f),return_raw=return_raw)
     except audioread.DecodeError:
         raise FingerprintGenerationError("audio could not be decoded")
     return duration, fp
@@ -299,7 +299,7 @@ def fingerprint_file(path,return_raw=False):
     """
     path = os.path.abspath(os.path.expanduser(path))
     if have_audioread and have_chromaprint:
-        return _fingerprint_file_audioread(path,return_raw)
+        return _fingerprint_file_audioread(path,return_raw=return_raw)
     else:
         return _fingerprint_file_fpcalc(path)
 

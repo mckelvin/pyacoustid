@@ -118,7 +118,7 @@ class Fingerprinter(object):
             self._ctx, data, len(data) // 2
         ))
 
-    def finish(self,return_raw= False):
+    def finish(self,return_raw=False):
         """Finish the fingerprint generation process and retrieve the
         resulting fignerprint as a bytestring.
         """
